@@ -1,28 +1,27 @@
+require("dotenv").config(); // Carregar variáveis de ambiente
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const { MongoClient } = require("mongodb");
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001; // Porta do servidor
+const mongoUri = process.env.MONGO_URI; // URL do MongoDB
+const dbName = process.env.DB_NAME; // Nome do banco de dados
+
+let db;
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-
-
-const url = "joabe:SIuyVB2BOrP58s9A@autoescola.t6tu2.mongodb.net/?retryWrites=true&w=majority&appName=autoescola"; // URL do MongoDB
-const dbName = "autoescola"; //
-let db;
-
 // Conectando ao banco de dados MongoDB
-MongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true })
+MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then((client) => {
     db = client.db(dbName);
-    console.log("Conectado ao MongoDB");
+    console.log(`Conectado ao MongoDB: ${dbName}`);
   })
-  .catch((err) => console.error("Erro ao conectar ao MongoDB", err));
+  .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
 // Rota para salvar depoimento
 app.post("/api/depoimentos", async (req, res) => {
