@@ -23,16 +23,34 @@ MongoClient.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true 
   })
   .catch((err) => console.error("Erro ao conectar ao MongoDB:", err));
 
+// Middleware para verificar conexão com o banco
+app.use((req, res, next) => {
+  if (!db) {
+    return res.status(500).json({ error: "Banco de dados não conectado" });
+  }
+  next();
+});
+
 // Rota para salvar depoimento
 app.post("/api/depoimentos", async (req, res) => {
   const { nome, texto, status, badge } = req.body;
 
+  // Validação dos dados
+  if (!nome || !texto || !status || !badge) {
+    return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+  }
+
   try {
     const depoimento = { nome, texto, status, badge, createdAt: new Date() };
     const result = await db.collection("depoimentos").insertOne(depoimento);
-    res.status(200).json(result.ops[0]); // Retorna o depoimento inserido
+    if (result.acknowledged) {
+      res.status(201).json(depoimento); // Retorna o depoimento criado
+    } else {
+      throw new Error("Falha ao inserir depoimento");
+    }
   } catch (err) {
-    res.status(500).json({ error: "Erro ao salvar depoimento" });
+    console.error("Erro ao salvar depoimento:", err);
+    res.status(500).json({ error: "Erro interno ao salvar depoimento" });
   }
 });
 
@@ -42,6 +60,7 @@ app.get("/api/depoimentos", async (req, res) => {
     const depoimentos = await db.collection("depoimentos").find().toArray();
     res.status(200).json(depoimentos);
   } catch (err) {
+    console.error("Erro ao buscar depoimentos:", err);
     res.status(500).json({ error: "Erro ao buscar depoimentos" });
   }
 });
