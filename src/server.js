@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 
 
 const url = "joabe:SIuyVB2BOrP58s9A@autoescola.t6tu2.mongodb.net/?retryWrites=true&w=majority&appName=autoescola"; // URL do MongoDB
-const dbName = "autoescola"; // Nome do banco de dados
+const dbName = "autoescola"; //
 let db;
 
 // Conectando ao banco de dados MongoDB
